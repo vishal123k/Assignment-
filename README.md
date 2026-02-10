@@ -61,7 +61,3 @@ Setup:-
 
 
 
-my backend routes:-
-
-
-
