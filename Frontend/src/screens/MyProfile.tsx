@@ -15,8 +15,12 @@ import API from "../api/axios";
 
 export default function MyProfile({ navigation }: any) {
 
+  //state to store user profile data
   const [user, setUser] = useState<any>(null);
+
+  //state to store user pets list
   const [pets, setPets] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(true);
 
 
@@ -27,12 +31,12 @@ export default function MyProfile({ navigation }: any) {
   );
 
 
-
+  //Fetch user and pet data from backend
   const loadData = async () => {
     try {
 
-      const u = await API.get("/user");
-      const p = await API.get("/pet");
+      const u = await API.get("/user"); // get user details
+      const p = await API.get("/pet");  // get pets list
 
       setUser(u.data);
       setPets(p.data);
@@ -45,6 +49,7 @@ export default function MyProfile({ navigation }: any) {
   };
 
 
+  //Delete pet with confirmation alert
   const deletePet = (id: string) => {
 
     Alert.alert(
@@ -58,7 +63,7 @@ export default function MyProfile({ navigation }: any) {
           onPress: async () => {
             try {
               await API.delete(`/pet/${id}`);
-              loadData();
+              loadData(); //refresh list after delete
             } catch {
               Alert.alert("Error", "Delete failed");
             }
@@ -69,6 +74,7 @@ export default function MyProfile({ navigation }: any) {
   };
 
 
+  //clear token
   const logout = async () => {
     await AsyncStorage.removeItem("token");
 
@@ -78,7 +84,6 @@ export default function MyProfile({ navigation }: any) {
   };
 
 
-
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-white">
@@ -86,7 +91,6 @@ export default function MyProfile({ navigation }: any) {
       </View>
     );
   }
-
 
 
   return (
@@ -180,7 +184,6 @@ export default function MyProfile({ navigation }: any) {
       </View>
 
 
-
       {pets.length === 0 ? (
 
         <View className="bg-white p-6 rounded-2xl items-center">
@@ -247,7 +250,6 @@ export default function MyProfile({ navigation }: any) {
               </View>
 
             </View>
-
 
 
             <View className="flex-row mt-4">

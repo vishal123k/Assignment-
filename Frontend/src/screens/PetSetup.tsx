@@ -16,9 +16,11 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 
 export default function PetSetup({ navigation, route }: any) {
 
+  //get pet data if coming from edit flow
   const pet = route?.params?.pet ?? null;
-  const isEdit = !!pet;
+  const isEdit = !!pet; // check create
 
+  //form states
   const [petName, setPetName] = useState("");
   const [breed, setBreed] = useState("");
   const [gender, setGender] = useState("Male");
@@ -28,6 +30,7 @@ export default function PetSetup({ navigation, route }: any) {
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  //prefill data when editing pet
   useEffect(() => {
     if (pet) {
       setPetName(pet.petName);
@@ -41,7 +44,7 @@ export default function PetSetup({ navigation, route }: any) {
   }, []);
 
 
-
+  // pick image from gallery
   const pickImage = async () => {
 
     const permission =
@@ -63,7 +66,7 @@ export default function PetSetup({ navigation, route }: any) {
   };
 
 
-
+  //create or update pet
   const handlePet = async () => {
 
     if (!petName || !breed)
@@ -73,6 +76,7 @@ export default function PetSetup({ navigation, route }: any) {
 
     try {
 
+      //formData for image + text
       const formData = new FormData();
 
       formData.append("petName", petName);
@@ -82,6 +86,7 @@ export default function PetSetup({ navigation, route }: any) {
       formData.append("weight", weight);
       formData.append("vaccinated", vaccinated.toString());
 
+      //append image only if it's newly selected
       if (image && !image.startsWith("http")) {
         formData.append("image", {
           uri: image,
@@ -90,6 +95,7 @@ export default function PetSetup({ navigation, route }: any) {
         } as any);
       }
 
+      //api call based on mode
       if (isEdit) {
         await API.put(`/pet/${pet._id}`, formData);
       } else {
@@ -104,7 +110,6 @@ export default function PetSetup({ navigation, route }: any) {
 
     setLoading(false);
   };
-
 
 
   return (
@@ -127,7 +132,6 @@ export default function PetSetup({ navigation, route }: any) {
           {isEdit ? "Edit Pet" : "Create Pet"}
         </Text>
 
-
         {!isEdit && (
           <TouchableOpacity
             onPress={() => navigation.replace("MyProfile")}
@@ -138,9 +142,7 @@ export default function PetSetup({ navigation, route }: any) {
             </Text>
           </TouchableOpacity>
         )}
-
       </View>
-
 
       <TouchableOpacity
         onPress={pickImage}
@@ -161,7 +163,6 @@ export default function PetSetup({ navigation, route }: any) {
       </TouchableOpacity>
 
 
-
       <View className="bg-gray-50 p-5 rounded-3xl">
 
         <TextInput
@@ -177,8 +178,6 @@ export default function PetSetup({ navigation, route }: any) {
           onChangeText={setBreed}
           className="border border-gray-200 p-4 rounded-2xl mb-3"
         />
-
-
 
         <Text className="font-semibold mb-2">
           Gender
@@ -220,7 +219,6 @@ export default function PetSetup({ navigation, route }: any) {
         </View>
 
 
-
         <TextInput
           placeholder="Age"
           keyboardType="numeric"
@@ -237,8 +235,6 @@ export default function PetSetup({ navigation, route }: any) {
           className="border border-gray-200 p-4 rounded-2xl mb-3"
         />
 
-
-
         <View className="flex-row justify-between items-center mt-2">
           <Text className="font-semibold">
             Vaccinated
@@ -251,8 +247,6 @@ export default function PetSetup({ navigation, route }: any) {
         </View>
 
       </View>
-
-
 
       <TouchableOpacity
         disabled={loading}

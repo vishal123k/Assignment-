@@ -23,8 +23,10 @@ export default function ProfileSetup({ navigation }: any) {
     const [contact, setContact] = useState("");
     const [image, setImage] = useState<string | null>(null);
 
+
     const [loading, setLoading] = useState(false);
 
+    //fetch existing user data
     useEffect(() => {
         fetchUser();
     }, []);
@@ -38,9 +40,12 @@ export default function ProfileSetup({ navigation }: any) {
 
                 setName(res.data.name || "");
                 setBio(res.data.bio || "");
+
+                //convert interests array to commaseparated string
                 setInterests(
                     res.data.interests?.join(",") || ""
                 );
+
                 setContact(res.data.contactInfo || "");
                 setImage(res.data.profileImage || null);
             }
@@ -89,6 +94,7 @@ export default function ProfileSetup({ navigation }: any) {
             formData.append("bio", bio);
             formData.append("contactInfo", contact);
 
+            //convert interests string into array
             formData.append(
                 "interests",
                 JSON.stringify(
@@ -106,7 +112,6 @@ export default function ProfileSetup({ navigation }: any) {
                     type: "image/jpeg"
                 } as any);
             }
-
 
             await API.put("/user", formData);
 
@@ -129,6 +134,7 @@ export default function ProfileSetup({ navigation }: any) {
 
     return (
 
+
         <KeyboardAvoidingView
             className="flex-1 bg-[#F7F8FA]"
             behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -141,13 +147,16 @@ export default function ProfileSetup({ navigation }: any) {
 
                 <View className="px-6 pt-20">
 
+
                     <Text className="text-4xl font-extrabold text-center text-gray-900">
                         Your Profile
                     </Text>
 
+
                     <Text className="text-gray-500 text-center mt-2 mb-10">
                         Tell us about yourself
                     </Text>
+
 
                     <TouchableOpacity
                         onPress={pickImage}
@@ -168,6 +177,7 @@ export default function ProfileSetup({ navigation }: any) {
                         </Text>
 
                     </TouchableOpacity>
+
 
 
 
@@ -202,6 +212,7 @@ export default function ProfileSetup({ navigation }: any) {
                         />
 
                     </View>
+
 
 
 
