@@ -71,7 +71,7 @@ export default function AuthScreen({ navigation }: any) {
           password
         });
 
-        navigation.navigate("Otp", { email });
+        navigation.replace("Otp", { email });
 
       }
 
