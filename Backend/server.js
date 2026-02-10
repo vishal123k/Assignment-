@@ -16,7 +16,7 @@ app.use(require("./routes/userRoutes"));
 app.use(require("./routes/petRoutes"));
 
 app.get("/", (req, res) => {
-  res.send("API Running...");
+  res.send("server is working now");
 });
 
 
