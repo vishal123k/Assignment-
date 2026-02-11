@@ -1,99 +1,126 @@
-  const User = require("../models/User");
-  const cloudinary = require("../config/cloudinary");
-
-  const extractPublicId = (url)=>{
-    if(!url) return null;
-
-    return url
-      .split("/")
-      .slice(-2)
-      .join("/")
-      .split(".")[0]; 
-  };
+const User = require("../models/User");
+const cloudinary = require("../config/cloudinary");
 
 
+// 🔹 Extract cloudinary public id safely
+const extractPublicId = (url) => {
+  if (!url) return null;
 
-  const updateUser = async (req,res)=>{
-  try{
+  const parts = url.split("/");
+  const file = parts[parts.length - 1];
+  const folder = parts[parts.length - 2];
+
+  return `${folder}/${file.split(".")[0]}`;
+};
+
+
+
+// =======================
+// 🔹 UPDATE USER
+// =======================
+
+const updateUser = async (req, res) => {
+  try {
+
+    console.log("BODY 👉", req.body);
+    console.log("FILE 👉", req.file);
 
     const user = await User.findById(req.user.id);
 
-    if(!user){
+    if (!user) {
       return res.status(404).json({
-        message:"User not found"
+        message: "User not found"
       });
     }
 
+    // 🔥 Safely delete old image
+    if (req.file && user.profileImage) {
+      try {
+        const publicId = extractPublicId(user.profileImage);
 
-    if(req.file && user.profileImage){
-
-      const publicId =
-        extractPublicId(user.profileImage);
-
-      await cloudinary.uploader.destroy(publicId);
-    }
-
-
-    if(req.body.interests){
-      try{
-        req.body.interests =
-          JSON.parse(req.body.interests);
-      }catch{
-        req.body.interests = [];
+        if (publicId) {
+          await cloudinary.uploader.destroy(publicId);
+        }
+      } catch (err) {
+        console.log("Cloudinary delete error:", err);
       }
     }
 
+    // 🔹 Parse interests safely
+    let interests = [];
+    if (req.body.interests) {
+      try {
+        interests = JSON.parse(req.body.interests);
+      } catch {
+        interests = [];
+      }
+    }
 
+    // 🔹 Only allowed fields
     const updates = {
-      ...req.body
+      name: req.body.name,
+      bio: req.body.bio,
+      contactInfo: req.body.contactInfo,
+      interests
     };
 
-
-    if(req.file){
+    // 🔹 If new image uploaded
+    if (req.file) {
       updates.profileImage = req.file.path;
     }
 
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      updates,
+      {
+        new: true,
+        runValidators: true
+      }
+    ).select("-password");
 
-    const updatedUser =
-      await User.findByIdAndUpdate(
-        req.user.id,
-        updates,
-        {
-          new:true,
-          runValidators:true
-        }
-      ).select("-password");
-
-
-    res.json(updatedUser);
-
-  }catch(err){
-    console.log(err);
-    res.status(500).json({
-      message:"Update failed"
+    return res.json({
+      message: "Profile updated successfully",
+      user: updatedUser
     });
+
+  } catch (err) {
+
+    console.log("UPDATE ERROR 👉", err);
+
+    if (!res.headersSent) {
+      return res.status(500).json({
+        message: err.message || "Update failed"
+      });
+    }
   }
 };
 
 
 
-  const getUser = async (req,res)=>{
-    try{
+// =======================
+// 🔹 GET USER
+// =======================
 
-      const user = await User
-        .findById(req.user.id)
-        .select("-password");
+const getUser = async (req, res) => {
+  try {
 
-      res.json(user);
+    const user = await User
+      .findById(req.user.id)
+      .select("-password");
 
-    }catch{
-      res.status(500).json({
-        message:"Fetch failed"
-      });
-    }
-  };
+    return res.json(user);
 
-  module.exports = {
-    updateUser,
-    getUser
-  };
+  } catch (err) {
+
+    console.log("GET ERROR 👉", err);
+
+    return res.status(500).json({
+      message: err.message || "Fetch failed"
+    });
+  }
+};
+
+module.exports = {
+  updateUser,
+  getUser
+};

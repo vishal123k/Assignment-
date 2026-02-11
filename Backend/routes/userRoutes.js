@@ -7,12 +7,12 @@ const {
   getUser
 } = require("../controllers/userController");
 
-router.get("/user",auth,getUser);
+router.get("/user", auth, getUser);
 
 router.put(
   "/user",
   auth,
-  upload.single("profileImage"),
+  upload.single("profileImage"),  // ⭐ IMPORTANT
   updateUser
 );
 
