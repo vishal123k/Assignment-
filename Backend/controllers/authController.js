@@ -25,7 +25,13 @@ const signUp = async (req, res) => {
       otpExpires: Date.now() + 10 * 60 * 1000,
     });
 
-    await sendEmail(email, "Verify your email", `Your OTP is ${otp}`);
+    res.status(201).json({
+      message: "OTP sent to email",
+    });
+
+    sendEmail(email, "Verify your email", `Your OTP is ${otp}`).catch((err) =>
+      console.log(err),
+    );
 
     res.status(201).json({
       message: "OTP sent to email",
