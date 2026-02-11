@@ -6,20 +6,11 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL,
     pass: process.env.EMAIL_PASS,
   },
+  family: 4, // ⭐ VERY IMPORTANT (IPv6 error fix)
 });
-
-transporter.verify(function (error, success) {
-  if (error) {
-    console.log("SMTP ERROR:", error);
-  } else {
-    console.log("Server is ready to send mail");
-  }
-});
-
 
 const sendEmail = async (to, subject, text) => {
   try {
-
     await transporter.sendMail({
       from: `"PawMatch" <${process.env.EMAIL}>`,
       to,
@@ -27,11 +18,10 @@ const sendEmail = async (to, subject, text) => {
       text,
     });
 
-    console.log("Email sent");
-
+    console.log("Email sent successfully");
   } catch (err) {
-
-    console.log("EMAIL ERROR", err.message);
+    console.log("EMAIL ERROR:", err);
+    throw err;
   }
 };
 
