@@ -7,20 +7,18 @@ import {
   Switch,
   Alert,
   Image,
-  ScrollView,
   ActivityIndicator
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as ImagePicker from "expo-image-picker";
 import API from "../api/axios";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function PetSetup({ navigation, route }: any) {
 
-  //get pet data if coming from edit flow
   const pet = route?.params?.pet ?? null;
-  const isEdit = !!pet; // check create
+  const isEdit = !!pet;
 
-  //form states
   const [petName, setPetName] = useState("");
   const [breed, setBreed] = useState("");
   const [gender, setGender] = useState("Male");
@@ -30,23 +28,19 @@ export default function PetSetup({ navigation, route }: any) {
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  //prefill data when editing pet
   useEffect(() => {
     if (pet) {
       setPetName(pet.petName);
       setBreed(pet.breed);
       setGender(pet.gender);
-      setAge(pet.age.toString());
-      setWeight(pet.weight.toString());
+      setAge(pet.age?.toString() || "");
+      setWeight(pet.weight?.toString() || "");
       setVaccinated(pet.vaccinated);
       setImage(pet.image);
     }
   }, []);
 
-
-  // pick image from gallery
   const pickImage = async () => {
-
     const permission =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -65,8 +59,6 @@ export default function PetSetup({ navigation, route }: any) {
     }
   };
 
-
-  //create or update pet
   const handlePet = async () => {
 
     if (!petName || !breed)
@@ -76,7 +68,6 @@ export default function PetSetup({ navigation, route }: any) {
 
     try {
 
-      //formData for image + text
       const formData = new FormData();
 
       formData.append("petName", petName);
@@ -86,7 +77,6 @@ export default function PetSetup({ navigation, route }: any) {
       formData.append("weight", weight);
       formData.append("vaccinated", vaccinated.toString());
 
-      //append image only if it's newly selected
       if (image && !image.startsWith("http")) {
         formData.append("image", {
           uri: image,
@@ -95,21 +85,14 @@ export default function PetSetup({ navigation, route }: any) {
         } as any);
       }
 
-      //api call based on mode
       if (isEdit) {
         await API.put(`/pet/${pet._id}`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         });
-
       } else {
         await API.post("/pet", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         });
-
       }
 
       navigation.navigate("MyProfile");
@@ -121,162 +104,170 @@ export default function PetSetup({ navigation, route }: any) {
     setLoading(false);
   };
 
-
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F8FA" }}>
 
-    <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: "#F7F8FA" }}
-      contentContainerStyle={{
-        flexGrow: 1,
-        justifyContent: "center",
-        paddingHorizontal: 24
-      }}
-      enableOnAndroid={true}
-      extraScrollHeight={20}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-    >
-
-      <View className="flex-row justify-between items-center mb-6">
-        <Text className="text-3xl font-bold">
-          {isEdit ? "Edit Pet" : "Create Pet"}
-        </Text>
-
-        {!isEdit && (
-          <TouchableOpacity
-            onPress={() => navigation.replace("MyProfile")}
-            className="border border-indigo-500 px-3 py-1 rounded-full"
-          >
-            <Text className="text-indigo-500 font-semibold">
-              Skip
-            </Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      <TouchableOpacity
-        onPress={pickImage}
-        className="h-44 bg-gray-100 rounded-3xl justify-center items-center mb-6 overflow-hidden"
+      <KeyboardAwareScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: 24,
+          paddingBottom: 40
+        }}
+        enableOnAndroid={true}
+        extraScrollHeight={20}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
 
-        {image ? (
-          <Image
-            source={{ uri: image }}
-            className="w-full h-full"
-          />
-        ) : (
-          <Text className="text-gray-400">
-            Tap to upload image
-          </Text>
-        )}
-
-      </TouchableOpacity>
-
-
-      <View className="bg-gray-50 p-5 rounded-3xl">
-
-        <TextInput
-          placeholder="Pet Name"
-          value={petName}
-          onChangeText={setPetName}
-          className="border border-gray-200 p-4 rounded-2xl mb-3"
-        />
-
-        <TextInput
-          placeholder="Breed"
-          value={breed}
-          onChangeText={setBreed}
-          className="border border-gray-200 p-4 rounded-2xl mb-3"
-        />
-
-        <Text className="font-semibold mb-2">
-          Gender
-        </Text>
-
-        <View className="flex-row mb-4">
-
-          <TouchableOpacity
-            className={`flex-1 p-4 rounded-2xl mr-2 ${gender === "Male"
-              ? "bg-indigo-500"
-              : "bg-gray-200"
-              }`}
-            onPress={() => setGender("Male")}
-          >
-            <Text className={`text-center ${gender === "Male"
-              ? "text-white"
-              : "text-black"
-              }`}>
-              Male
-            </Text>
-          </TouchableOpacity>
-
-
-          <TouchableOpacity
-            className={`flex-1 p-4 rounded-2xl ${gender === "Female"
-              ? "bg-indigo-500"
-              : "bg-gray-200"
-              }`}
-            onPress={() => setGender("Female")}
-          >
-            <Text className={`text-center ${gender === "Female"
-              ? "text-white"
-              : "text-black"
-              }`}>
-              Female
-            </Text>
-          </TouchableOpacity>
-
-        </View>
-
-
-        <TextInput
-          placeholder="Age"
-          keyboardType="numeric"
-          value={age}
-          onChangeText={setAge}
-          className="border border-gray-200 p-4 rounded-2xl mb-3"
-        />
-
-        <TextInput
-          placeholder="Weight"
-          keyboardType="numeric"
-          value={weight}
-          onChangeText={setWeight}
-          className="border border-gray-200 p-4 rounded-2xl mb-3"
-        />
-
-        <View className="flex-row justify-between items-center mt-2">
-          <Text className="font-semibold">
-            Vaccinated
+        {/* Header */}
+        <View className="flex-row justify-between items-center mb-6 mt-4">
+          <Text className="text-3xl font-bold">
+            {isEdit ? "Edit Pet" : "Create Pet"}
           </Text>
 
-          <Switch
-            value={vaccinated}
-            onValueChange={setVaccinated}
-          />
+          {!isEdit && (
+            <TouchableOpacity
+              onPress={() => navigation.replace("MyProfile")}
+              className="border border-indigo-500 px-3 py-1 rounded-full"
+            >
+              <Text className="text-indigo-500 font-semibold">
+                Skip
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
-      </View>
-
-      <TouchableOpacity
-        disabled={loading}
-        onPress={handlePet}
-        className={`p-4 rounded-2xl mt-6 ${loading
-          ? "bg-gray-400"
-          : "bg-indigo-500"
-          }`}
-      >
-
-        {loading
-          ? <ActivityIndicator color="white" />
-          : (
-            <Text className="text-white text-center font-bold text-lg">
-              {isEdit ? "Update Pet" : "Create Pet"}
+        {/* Image Upload */}
+        <TouchableOpacity
+          onPress={pickImage}
+          className="h-44 bg-gray-100 rounded-3xl justify-center items-center mb-6 overflow-hidden"
+        >
+          {image ? (
+            <Image
+              source={{ uri: image }}
+              className="w-full h-full"
+            />
+          ) : (
+            <Text className="text-gray-400">
+              Tap to upload image
             </Text>
           )}
+        </TouchableOpacity>
 
-      </TouchableOpacity>
+        {/* Form Card */}
+        <View className="bg-white p-5 rounded-3xl">
 
-    </KeyboardAwareScrollView>
+          <TextInput
+            placeholder="Pet Name"
+            placeholderTextColor="#6B7280"
+            value={petName}
+            onChangeText={setPetName}
+            className="border border-gray-200 p-4 rounded-2xl mb-3 text-black"
+          />
+
+          <TextInput
+            placeholder="Breed"
+            placeholderTextColor="#6B7280"
+            value={breed}
+            onChangeText={setBreed}
+            className="border border-gray-200 p-4 rounded-2xl mb-3 text-black"
+          />
+
+          <Text className="font-semibold mb-2">
+            Gender
+          </Text>
+
+          <View className="flex-row mb-4">
+
+            <TouchableOpacity
+              className={`flex-1 p-4 rounded-2xl mr-2 ${
+                gender === "Male"
+                  ? "bg-indigo-500"
+                  : "bg-gray-200"
+              }`}
+              onPress={() => setGender("Male")}
+            >
+              <Text className={`text-center ${
+                gender === "Male"
+                  ? "text-white"
+                  : "text-black"
+              }`}>
+                Male
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className={`flex-1 p-4 rounded-2xl ${
+                gender === "Female"
+                  ? "bg-indigo-500"
+                  : "bg-gray-200"
+              }`}
+              onPress={() => setGender("Female")}
+            >
+              <Text className={`text-center ${
+                gender === "Female"
+                  ? "text-white"
+                  : "text-black"
+              }`}>
+                Female
+              </Text>
+            </TouchableOpacity>
+
+          </View>
+
+          <TextInput
+            placeholder="Age"
+            placeholderTextColor="#6B7280"
+            keyboardType="numeric"
+            value={age}
+            onChangeText={setAge}
+            className="border border-gray-200 p-4 rounded-2xl mb-3 text-black"
+          />
+
+          <TextInput
+            placeholder="Weight"
+            placeholderTextColor="#6B7280"
+            keyboardType="numeric"
+            value={weight}
+            onChangeText={setWeight}
+            className="border border-gray-200 p-4 rounded-2xl mb-3 text-black"
+          />
+
+          <View className="flex-row justify-between items-center mt-2">
+            <Text className="font-semibold">
+              Vaccinated
+            </Text>
+
+            <Switch
+              value={vaccinated}
+              onValueChange={setVaccinated}
+            />
+          </View>
+
+        </View>
+
+        {/* Button */}
+        <TouchableOpacity
+          disabled={loading}
+          onPress={handlePet}
+          style={{
+            height: 56,
+            justifyContent: "center",
+            borderRadius: 16,
+            marginTop: 24,
+            backgroundColor: loading ? "#9CA3AF" : "#6366F1"
+          }}
+        >
+          {loading
+            ? <ActivityIndicator color="white" />
+            : (
+              <Text className="text-white text-center font-bold text-lg">
+                {isEdit ? "Update Pet" : "Create Pet"}
+              </Text>
+            )}
+        </TouchableOpacity>
+
+      </KeyboardAwareScrollView>
+    </SafeAreaView>
   );
 }
