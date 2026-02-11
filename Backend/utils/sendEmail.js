@@ -1,28 +1,29 @@
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false,
   auth: {
-    user: process.env.EMAIL,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.BREVO_USER,
+    pass: process.env.BREVO_PASS,
   },
-  family: 4, // ⭐ VERY IMPORTANT (IPv6 error fix)
 });
 
 const sendEmail = async (to, subject, text) => {
   try {
     await transporter.sendMail({
-      from: `"PawMatch" <${process.env.EMAIL}>`,
+      from: `"PawMatch" <${process.env.BREVO_USER}>`,
       to,
       subject,
       text,
     });
 
-    console.log("Email sent successfully");
+    console.log("Email sent");
   } catch (err) {
     console.log("EMAIL ERROR:", err);
-    throw err;
   }
 };
 
 module.exports = sendEmail;
+
