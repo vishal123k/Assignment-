@@ -113,7 +113,11 @@ export default function ProfileSetup({ navigation }: any) {
                 } as any);
             }
 
-            await API.put("/user", formData);
+            await API.put("/user", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
 
             navigation.replace("PetSetup");
 

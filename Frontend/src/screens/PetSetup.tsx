@@ -97,9 +97,19 @@ export default function PetSetup({ navigation, route }: any) {
 
       //api call based on mode
       if (isEdit) {
-        await API.put(`/pet/${pet._id}`, formData);
+        await API.put(`/pet/${pet._id}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
       } else {
-        await API.post("/pet", formData);
+        await API.post("/pet", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
       }
 
       navigation.navigate("MyProfile");
