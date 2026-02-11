@@ -25,22 +25,25 @@ const signUp = async (req, res) => {
       otpExpires: Date.now() + 10 * 60 * 1000,
     });
 
+    // ✅ SEND RESPONSE FIRST
     res.status(201).json({
       message: "OTP sent to email",
     });
 
-    sendEmail(email, "Verify your email", `Your OTP is ${otp}`).catch((err) =>
-      console.log(err),
-    );
+    // ✅ EMAIL IN BACKGROUND (NO AWAIT)
+    sendEmail(email, "Verify your email", `Your OTP is ${otp}`)
+      .catch(err => console.log("Email error:", err));
 
-    res.status(201).json({
-      message: "OTP sent to email",
-    });
   } catch (err) {
     console.log("signup error", err);
-    res.status(500).json({ message: "signup failed" });
+
+    // ✅ IMPORTANT
+    if (!res.headersSent) {
+      res.status(500).json({ message: "signup failed" });
+    }
   }
 };
+
 
 // verify email
 const verifyEmail = async (req, res) => {
