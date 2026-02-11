@@ -40,7 +40,7 @@ export default function ProfileSetup({ navigation }: any) {
                 setContact(res.data.contactInfo || "");
                 setImage(res.data.profileImage || null);
             }
-        } catch {}
+        } catch { }
     };
 
     const pickImage = async () => {
@@ -149,7 +149,6 @@ export default function ProfileSetup({ navigation }: any) {
                             Tell us about yourself
                         </Text>
 
-                        {/* Profile Image */}
                         <TouchableOpacity
                             onPress={pickImage}
                             className="self-center mb-6"
@@ -168,7 +167,6 @@ export default function ProfileSetup({ navigation }: any) {
                             </Text>
                         </TouchableOpacity>
 
-                        {/* Form Card */}
                         <View className="bg-white p-6 rounded-[30px]">
 
                             <TextInput
@@ -205,7 +203,6 @@ export default function ProfileSetup({ navigation }: any) {
 
                         </View>
 
-                        {/* Button */}
                         <TouchableOpacity
                             disabled={loading}
                             onPress={saveProfile}
