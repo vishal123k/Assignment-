@@ -1,8 +1,7 @@
 const User = require("../models/User");
 const cloudinary = require("../config/cloudinary");
 
-
-// 🔹 Extract cloudinary public id safely
+//Extract cloudinary public id safely
 const extractPublicId = (url) => {
   if (!url) return null;
 
@@ -13,27 +12,17 @@ const extractPublicId = (url) => {
   return `${folder}/${file.split(".")[0]}`;
 };
 
-
-
-// =======================
-// 🔹 UPDATE USER
-// =======================
-
 const updateUser = async (req, res) => {
   try {
-
-    console.log("BODY 👉", req.body);
-    console.log("FILE 👉", req.file);
-
     const user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({
-        message: "User not found"
+        message: "User not found",
       });
     }
 
-    // 🔥 Safely delete old image
+    //Safely delete image
     if (req.file && user.profileImage) {
       try {
         const publicId = extractPublicId(user.profileImage);
@@ -46,7 +35,6 @@ const updateUser = async (req, res) => {
       }
     }
 
-    // 🔹 Parse interests safely
     let interests = [];
     if (req.body.interests) {
       try {
@@ -56,71 +44,52 @@ const updateUser = async (req, res) => {
       }
     }
 
-    // 🔹 Only allowed fields
+    // only allowed fields
     const updates = {
       name: req.body.name,
       bio: req.body.bio,
       contactInfo: req.body.contactInfo,
-      interests
+      interests,
     };
 
-    // 🔹 If new image uploaded
+    //If new image uploaded
     if (req.file) {
       updates.profileImage = req.file.path;
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user.id,
-      updates,
-      {
-        new: true,
-        runValidators: true
-      }
-    ).select("-password");
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, updates, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
 
     return res.json({
       message: "Profile updated successfully",
-      user: updatedUser
+      user: updatedUser,
     });
-
   } catch (err) {
-
-    console.log("UPDATE ERROR 👉", err);
-
     if (!res.headersSent) {
       return res.status(500).json({
-        message: err.message || "Update failed"
+        message: err.message || "Update failed",
       });
     }
   }
 };
 
-
-
-// =======================
-// 🔹 GET USER
-// =======================
-
 const getUser = async (req, res) => {
   try {
-
-    const user = await User
-      .findById(req.user.id)
-      .select("-password");
+    const user = await User.findById(req.user.id).select("-password");
 
     return res.json(user);
-
   } catch (err) {
-
-    console.log("GET ERROR 👉", err);
+    console.log("GET ERROR", err);
 
     return res.status(500).json({
-      message: err.message || "Fetch failed"
+      message: err.message || "Fetch failed",
     });
   }
 };
 
 module.exports = {
   updateUser,
-  getUser
+  getUser,
 };

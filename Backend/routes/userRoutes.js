@@ -12,7 +12,7 @@ router.get("/user", auth, getUser);
 router.put(
   "/user",
   auth,
-  upload.single("profileImage"),  // ⭐ IMPORTANT
+  upload.single("profileImage"),
   updateUser
 );
 
